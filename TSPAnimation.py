@@ -77,6 +77,7 @@ def abc_algorithm(objective_function, distance_matrix, num_cities, colony_Size, 
             for i in range(colony_Size):
                 if r < probabilities[i]:
                     selected_index = i
+                    break
             selected_Solution = colony[selected_index][0]
             new_Solution = recreate_neighbor(selected_Solution)
             new_obj_func = objective_function(new_Solution, distance_matrix)
@@ -118,7 +119,7 @@ def abc_algorithm(objective_function, distance_matrix, num_cities, colony_Size, 
 random.seed(3)
 np.random.seed(3)
 
-cities = [(9,24),(2,18),(14,6),(6,27),(1,12),(11,30),(4,8),(15,20),(7,3),(3,25),(12,14),(8,22),(5,10),(13,4),(10,16)]
+cities = [(10,10), (5,20), (5,30), (10,40), (20,45), (30,45), (40,40), (45,30), (45,20), (40,10), (25,35), (25,25), (15,15), (35,15), (25,5)]
 num_cities = len(cities)
 distance_matrix = np.zeros((num_cities, num_cities))
 for i in range(num_cities):
@@ -128,7 +129,7 @@ for i in range(num_cities):
         distance_matrix[i][j] = np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
 colony_Size = 50
-num_iterations = 100
+num_iterations = 50
 
 best_Solution, best_Fitness, best_route_history = abc_algorithm(
     objective_function, distance_matrix, num_cities, colony_Size, num_iterations
@@ -138,7 +139,7 @@ print("Best solution:", best_Solution)
 print("Best Fitness:", best_Fitness)
 print("Frames recorded:", len(best_route_history))
 
-# --- Animation ---
+# --- Animation Part ---
 fig, ax = plt.subplots(figsize=(7, 7))
 xs_all = [c[0] for c in cities]
 ys_all = [c[1] for c in cities]

@@ -1,5 +1,7 @@
 import random
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 def objective_function(x):
     return sum(x**2)
@@ -16,7 +18,11 @@ def abc_algorithm(objective_function, num_Variables, colony_Size, num_iterations
     colony = []
     trial = [0] * colony_Size
     limit = colony_Size * num_Variables
+    history = []
+    trial_history = []
+    positions_history = []
 
+    #initialization
     for _ in range(colony_Size):
         solution = np.random.uniform(LB, UB, num_Variables)
         obj_func = objective_function(solution)
@@ -26,6 +32,8 @@ def abc_algorithm(objective_function, num_Variables, colony_Size, num_iterations
         if fit > best_Fitness:
             best_Solution = solution
             best_Fitness = fit
+    positions_history.append([c[0].copy() for c in colony])
+
     #ABC 
     for iterations in range(num_iterations):
         # Employed
@@ -64,6 +72,7 @@ def abc_algorithm(objective_function, num_Variables, colony_Size, num_iterations
             for i in range (colony_Size) :
                 if r < probabilities[i]:
                     selected_index = i
+                    break
                     
             selected_Solution = colony[selected_index][0]
 
@@ -111,18 +120,79 @@ def abc_algorithm(objective_function, num_Variables, colony_Size, num_iterations
                 best_Fitness = new_fit
         print(f"Iteration {iterations+1}: Best Fitness = {best_Fitness}")
         print(f"Best Solution = {best_Solution}")
-    return best_Solution, best_Fitness, trial
 
+        history.append(best_Fitness)
+        trial_history.append(trial.copy())
+        positions_history.append([c[0].copy() for c in colony])
+    return best_Solution, best_Fitness, trial, history, trial_history, positions_history
 
 colony_Size = 50
-num_Variables = 5
+num_Variables = 2
 num_iterations = 100
 LB = -5.0
 UB = 5.0
 
-best_Solution, best_Fitness, trial = abc_algorithm(objective_function, num_Variables, colony_Size, num_iterations, LB, UB)
+best_Solution, best_Fitness, trial, history, trial_history, positions_history = abc_algorithm(objective_function, num_Variables, colony_Size, num_iterations, LB, UB)
 
 print("======Artificial Bee Colony======")
 print("Best solution:", best_Solution)
 print("Best Fitness:", best_Fitness)
 print("Trial: ", trial)
+
+ax1 = plt.subplot(1,2,1)
+plt.plot(history)
+plt.grid()
+plt.xlabel("Iteration")
+plt.ylabel("Best Fitness")
+plt.title("Abc Algorithm")
+ax1.set_xticks(np.arange(0, num_iterations+1, 10))
+ax1.set_ylim(0.9,1)
+ax1.set_yticks(np.arange(0.69031748878123664, 1.0299, 0.02761))
+average_trial = [sum(t)/len(t) for t in trial_history]
+
+ax2 = plt.subplot(1,2,2)
+plt.plot(trial)
+plt.xlabel("Food Source Index")
+plt.ylabel("Trial Count")
+plt.title("Trial Count")
+ax2.set_xticks(np.arange(0, colony_Size+1, 2))
+plt.grid()
+
+grid = np.linspace(LB, UB, 200)
+X, Y = np.meshgrid(grid, grid)
+Z = X**2 + Y**2
+
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.contourf(X, Y, Z, levels=30, cmap='viridis')  
+
+colors = plt.cm.hsv(np.linspace(0, 1, colony_Size, endpoint=False))
+
+scat = ax.scatter(np.array(positions_history[0])[:,0], np.array(positions_history[0])[:,1], c=colors, edgecolors='black', linewidths=0.5, s=50, zorder=5)
+title = ax.set_title("")
+ax.set_xlabel("x1")
+ax.set_ylabel("x2")
+ax.set_xlim(LB, UB)
+ax.set_ylim(LB, UB)
+ax.set_xticks(np.arange(LB, UB+1, 1))
+ax.set_yticks(np.arange(LB, UB+1, 1))
+
+def update(frame):
+    pts = np.array(positions_history[frame])
+    scat.set_offsets(pts)
+    title.set_text(f"Artificial Bee Colony — Iteration {frame}/{num_iterations}")
+    
+    return scat, title
+
+ani = animation.FuncAnimation(fig, update, frames=len(positions_history), interval=150, blit=False, repeat=True)
+paused = False
+def on_key(event):
+    global paused 
+    if event.key == ' ':
+        if paused:
+            ani.resume()
+        else:
+            ani.pause()
+        paused = not paused
+
+fig.canvas.mpl_connect('key_press_event', on_key)    
+plt.show()
