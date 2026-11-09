@@ -77,8 +77,19 @@
 	- Pick the Food Source
 
 ###### **3 PHASES**
-![[Pasted image 20261109202032.png]]
-
+- Employed Bee Phase
+	- Employed bees look for a food source that is better than the one they are currently using.
+	- generate a new solution using a partner solution
+	- greedy selection: if the new solution is better than the current solution, accept the new solution
+	
+- Scout Bee Phase
+	- select a food source with a probability related to nectar amount by waggle dance
+	- generate a new solution using a partner solution
+	- greedy selection: if the new solution is better than the current solution, accept the new solution
+    
+- Onlooker Bee Phase
+	- exhausted food source is abandoned
+	- discard and generate new solution
 
 ###### **Real-world usage**
 - **Data Mining & Machine Learning**
