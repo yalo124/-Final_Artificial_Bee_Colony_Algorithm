@@ -22,10 +22,10 @@ def fitness(x):
 
 def recreate_neighbor(route):
     new_route = np.copy(route)
-    pos1 = random.randint(0, (len(route)-1))
-    pos2 = random.randint(0, (len(route)-1))
+    pos1 = random.randint(1, (len(route)-1))
+    pos2 = random.randint(1, (len(route)-1))
     while pos1 == pos2:
-        pos2 = random.randint(0, (len(route)-1))
+        pos2 = random.randint(1, (len(route)-1))
     temp = new_route[pos1]
     new_route[pos1] = new_route[pos2]
     new_route[pos2] = temp
@@ -40,9 +40,9 @@ def abc_algorithm(objective_function, distance_matrix, num_cities, colony_Size, 
     best_route_history = []  
 
     for _ in range(colony_Size):
-        city_indices = list(range(num_cities))
-        random.shuffle(city_indices)
-        solution = city_indices
+        rest_of_cities = list(range(1, num_cities))
+        random.shuffle(rest_of_cities)
+        solution = [0] + rest_of_cities
         obj_func = objective_function(solution, distance_matrix)
         fit = fitness(obj_func)
         colony.append((solution, fit))
@@ -101,9 +101,9 @@ def abc_algorithm(objective_function, distance_matrix, num_cities, colony_Size, 
             for k in exceeded:
                 if colony[k][1] < colony[worst_index][1]:
                     worst_index = k
-            new_city_indices = list(range(num_cities))
-            random.shuffle(new_city_indices)
-            new_solution = new_city_indices
+            rest_of_cities = list(range(1, num_cities))
+            random.shuffle(rest_of_cities)
+            new_solution = [0] + rest_of_cities
             new_obj_func = objective_function(new_solution, distance_matrix)
             new_fit = fitness(new_obj_func)
             colony[worst_index] = (new_solution, new_fit)
@@ -113,6 +113,9 @@ def abc_algorithm(objective_function, distance_matrix, num_cities, colony_Size, 
                 best_Fitness = new_fit
 
         best_route_history.append(list(best_Solution))   
+        if (iterations + 1) % 2 == 0:
+            print(f"Iteration {iterations+1}: Best Fitness = {best_Fitness}")
+            print(f"Best Solution = {best_Solution}\n")
 
     return best_Solution, best_Fitness, best_route_history
 
@@ -129,7 +132,7 @@ for i in range(num_cities):
         distance_matrix[i][j] = np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
 colony_Size = 50
-num_iterations = 50
+num_iterations = 80
 
 best_Solution, best_Fitness, best_route_history = abc_algorithm(
     objective_function, distance_matrix, num_cities, colony_Size, num_iterations
@@ -139,7 +142,7 @@ print("Best solution:", best_Solution)
 print("Best Fitness:", best_Fitness)
 print("Frames recorded:", len(best_route_history))
 
-# --- Animation Part ---
+# Animation Part
 fig, ax = plt.subplots(figsize=(7, 7))
 xs_all = [c[0] for c in cities]
 ys_all = [c[1] for c in cities]
